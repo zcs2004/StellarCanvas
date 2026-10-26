@@ -1,0 +1,54 @@
+# Note: We explicitly set CMAKE_CXX_STANDARD=14 when compiling exiv2 because
+# it uses `auto_ptr`, which has been removed in c++17. Clang 16 switches to
+# using -std=c++17 by default, and that causes build failures with libc++.
+
+# FIXME: Remove this setting when exiv2 has been updated to remove usage of
+# `auto_ptr`, and also remove the workaround in `FindLibExiv2.cmake`.
+
+cmake_minimum_required(VERSION 3.29)
+
+project(ext_exiv2)
+include(${CMAKE_SOURCE_DIR}/../cmake/base-dep-options.cmake)
+
+if (ANDROID)
+    ExternalProject_Add(
+        ext_exiv2
+
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+        URL https://github.com/Exiv2/exiv2/archive/refs/tags/v0.28.8.tar.gz
+        URL_HASH SHA256=ea51b0609f58a9afa063b60daa1539948b62247721e154f4fff0ad3aec9f9756
+
+        CMAKE_ARGS -DCMAKE_CXX_STANDARD=14 -DCMAKE_INSTALL_PREFIX=${EXTPREFIX} -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE} -DEXIV2_BUILD_SAMPLES=OFF -DEXIV2_ENABLE_NLS=OFF -DEXPAT_LIBRARY=${EXTPREFIX}/lib/libexpat.so -DEXPAT_INCLUDE_DIR=${EXTPREFIX}/include -DEXIV2_BUILD_EXIV2_COMMAND=OFF -DEXIV2_ENABLE_INIH=OFF
+        UPDATE_COMMAND ""
+    )
+
+elseif(WIN32)
+    ExternalProject_Add(
+        ext_exiv2
+        
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+        URL https://github.com/Exiv2/exiv2/archive/refs/tags/v0.28.8.tar.gz
+        URL_HASH SHA256=ea51b0609f58a9afa063b60daa1539948b62247721e154f4fff0ad3aec9f9756
+
+        CMAKE_ARGS -DCMAKE_CXX_STANDARD=14 -DCMAKE_INSTALL_PREFIX=${EXTPREFIX} -DCMAKE_LIBRARY_PATH=${EXTPREFIX}/lib -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE} -DEXIV2_BUILD_SAMPLES=OFF -DEXIV2_ENABLE_NLS=OFF -DEXIV2_BUILD_EXIV2_COMMAND=OFF -DEXIV2_ENABLE_INIH=OFF
+        UPDATE_COMMAND ""
+    )
+else()
+    ExternalProject_Add(
+        ext_exiv2
+
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+        URL https://github.com/Exiv2/exiv2/archive/refs/tags/v0.28.8.tar.gz
+        URL_HASH SHA256=ea51b0609f58a9afa063b60daa1539948b62247721e154f4fff0ad3aec9f9756
+
+        CMAKE_ARGS -DCMAKE_CXX_STANDARD=14 -DCMAKE_INSTALL_PREFIX=${EXTPREFIX} -DCMAKE_LIBRARY_PATH=${EXTPREFIX}/lib 
+            -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE} -DEXIV2_BUILD_SAMPLES=OFF
+            -DEXIV2_ENABLE_NLS=OFF -DEXIV2_BUILD_EXIV2_COMMAND=OFF -DCMAKE_CXX_FLAGS=-Wno-deprecated -DEXIV2_ENABLE_INIH=OFF
+            -DEXIV2_BUILD_UNIT_TESTS=OFF -DEXIV2_BUILD_FUZZ_TESTS=OFF
+
+        UPDATE_COMMAND ""
+    )
+    
+endif()
+
+krita_add_to_ci_targets(ext_exiv2)

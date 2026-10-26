@@ -1,0 +1,32 @@
+# Meson cross file for an arm64 HarmonyOS target.
+#
+# Before use, replace both placeholders below with absolute paths on your
+# machine. Forward slashes are recommended on Windows:
+#   C:/path/to/DevEcoStudio/sdk/default/openharmony
+#   C:/path/to/StellarCanvas
+
+[binaries]
+c = 'C:/path/to/DevEcoStudio/sdk/default/openharmony/native/llvm/bin/clang.exe'
+cpp = 'C:/path/to/DevEcoStudio/sdk/default/openharmony/native/llvm/bin/clang++.exe'
+ar = 'C:/path/to/DevEcoStudio/sdk/default/openharmony/native/llvm/bin/llvm-ar.exe'
+strip = 'C:/path/to/DevEcoStudio/sdk/default/openharmony/native/llvm/bin/llvm-strip.exe'
+pkg-config = 'C:/path/to/StellarCanvas/build/host-tools/bin/pkgconf.exe'
+cmake = 'C:/path/to/DevEcoStudio/sdk/default/openharmony/native/build-tools/cmake/bin/cmake.exe'
+gperf = 'C:/path/to/StellarCanvas/build/host-tools/bin/gperf.exe'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'aarch64'
+cpu = 'armv8-a'
+endian = 'little'
+
+[properties]
+sys_root = 'C:/path/to/DevEcoStudio/sdk/default/openharmony/native/sysroot'
+pkg_config_libdir = 'C:/path/to/StellarCanvas/build/ohos-deps/lib/pkgconfig'
+cmake_toolchain_file = 'C:/path/to/DevEcoStudio/sdk/default/openharmony/native/build/cmake/ohos.toolchain.cmake'
+
+[built-in options]
+c_args = ['--target=aarch64-linux-ohos', '--sysroot=C:/path/to/DevEcoStudio/sdk/default/openharmony/native/sysroot', '-D__MUSL__', '-fPIC']
+cpp_args = ['--target=aarch64-linux-ohos', '--sysroot=C:/path/to/DevEcoStudio/sdk/default/openharmony/native/sysroot', '-D__MUSL__', '-fPIC']
+c_link_args = ['--target=aarch64-linux-ohos', '--sysroot=C:/path/to/DevEcoStudio/sdk/default/openharmony/native/sysroot', '--rtlib=compiler-rt', '-fuse-ld=lld', '-Wl,--no-undefined', '-lunwind']
+cpp_link_args = ['--target=aarch64-linux-ohos', '--sysroot=C:/path/to/DevEcoStudio/sdk/default/openharmony/native/sysroot', '--rtlib=compiler-rt', '-fuse-ld=lld', '-Wl,--no-undefined', '-lunwind']

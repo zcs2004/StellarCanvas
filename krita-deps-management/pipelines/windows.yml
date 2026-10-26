@@ -1,0 +1,91 @@
+all_publish_windows:
+  stage: Dependencies
+  extends:
+  - .seed_template
+  - .windows_base
+  # use large-timeout nodes for full rebuilds
+  tags:
+    - LargeVM
+    - amd64
+  script:
+    - python -u tools/concatenate-files.py -i latest/deps-build-tools.yml -i latest/krita-deps.yml -o all-deps-to-build.yml
+    - python -u tools/replace-branch-in-seed-file.py all-deps-to-build.yml --print --dst-branch $BRANCH_NAME_WINDOWS
+    - python -u ci-utilities/seed-package-registry.py --seed-file all-deps-to-build.yml --platform Windows 2>&1 | Tee-Object -FilePath "seed-packages-win64.log"
+
+# All publish
+all_publish_windows_dev:
+  stage: Dependencies
+  extends:
+  - .seed_template_auto
+  - .windows_base
+  # use large-timeout nodes for full rebuilds
+  tags:
+    - LargeVM
+    - amd64
+  script:
+    - python -u tools/replace-branch-in-seed-file.py latest\developer-packages.yml --print --dst-branch $BRANCH_NAME_WINDOWS
+    - python -u ci-utilities/seed-package-registry.py --seed-file latest/developer-packages.yml --platform Windows 2>&1 | Tee-Object -FilePath "seed-packages-win64-dev.log"
+  needs:
+    - job: all_publish_windows 
+      artifacts: false
+
+all_publish_windows_openvino:
+  stage: Dependencies
+  extends:
+  - .seed_template_auto
+  - .windows_base
+  # use large-timeout nodes for full rebuilds
+  tags:
+    - LargeVM
+    - amd64
+  script:
+    - python -u tools/replace-branch-in-seed-file.py latest\openvino-packages.yml --print --dst-branch $BRANCH_NAME_WINDOWS
+    - python -u ci-utilities/seed-package-registry.py --seed-file latest/openvino-packages.yml --platform Windows 2>&1 | Tee-Object -FilePath "seed-packages-win64-openvino.log"
+  needs:
+    - job: all_publish_windows 
+      artifacts: false
+
+
+
+all_local_cache_windows:
+  extends: 
+    - all_publish_windows
+    - .local_cache_mixin
+  variables:
+    KDECI_SIGN_BINARIES: False
+
+all_shared_windows:
+  extends: 
+    - all_publish_windows
+    - .shared_build_mixin
+  variables:
+    KDECI_SIGN_BINARIES: False
+
+custom_publish_windows:
+  stage: Dependencies
+  extends:
+  - .seed_template
+  - .windows_base
+  - .stage_deps_input_template
+  script:
+    - python -u ci-utilities/seed-multiple-projects.py -p "${{ job.inputs.KRITA_STAGE_DEP }}" --platform Windows --branch $BRANCH_NAME_WINDOWS 2>&1 | Tee-Object -FilePath "seed-packages-win64.log"
+
+custom_local_cache_windows:
+  extends:
+  - custom_publish_windows
+  - .local_cache_mixin
+  variables:
+    KDECI_SIGN_BINARIES: False
+
+dirty_publish_windows:
+  extends:
+    - custom_publish_windows
+  script:
+  - python -u tools/seed-dirty-projects.py -p "${{ job.inputs.KRITA_STAGE_DEP }}" --platform Windows --branch $BRANCH_NAME_WINDOWS 2>&1 | Tee-Object -FilePath "seed-packages-win64.log"
+
+dirty_local_cache_windows:
+  extends:
+  - dirty_publish_windows
+  - .local_cache_mixin
+  variables:
+    KDECI_SIGN_BINARIES: False

@@ -1,0 +1,18 @@
+Dependencies:
+- 'on': ['@all']
+  'require':
+    'base/freetype': '@same'
+    'base/fontconfig': '@same'
+    'base/qt': '@same'
+    'base/jpeg': '@same'
+    'base/png': '@same'
+    'base/tiff': '@same'
+    'base/boost': '@same'
+    'base/lcms2': '@same'
+- 'on': ['Windows']
+  'require':
+    'base/iconv': '@same'
+BuildDependencies:
+- 'on': ['Windows']
+  'require':
+    'base/patch': '@same'

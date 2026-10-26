@@ -1,0 +1,13 @@
+Dependencies:
+- 'on': ['@all']
+  'require':
+    'ffmpeg/libogg': '@same'
+    'ffmpeg/libvorbis': '@same'
+    'base/png': '@same'
+- 'on': ['Windows', 'MacOS']
+  'require':
+    'base/pkgconfig': '@same'
+BuildDependencies:
+- 'on': ['Windows']
+  'require':
+    'base/patch': '@same'

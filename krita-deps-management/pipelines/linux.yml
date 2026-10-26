@@ -1,0 +1,69 @@
+all_publish_linux:
+  stage: Dependencies
+  extends:
+  - .appimage_base
+  - .seed_template
+  script:
+    - python3 -u tools/concatenate-files.py -i latest/deps-build-tools.yml -i latest/krita-deps.yml -o all-deps-to-build.yml
+    - python3 -u tools/replace-branch-in-seed-file.py all-deps-to-build.yml --print --dst-branch $BRANCH_NAME_LINUX
+    - python3 -u ci-utilities/seed-package-registry.py --seed-file all-deps-to-build.yml --platform Linux 2>&1 | tee "seed-packages-linux.log"
+
+all_publish_linux_dev:
+  stage: Dependencies
+  extends:
+  - .appimage_base
+  - .seed_template_auto
+  script:
+    - python3 -u tools/replace-branch-in-seed-file.py latest/developer-packages.yml --print --dst-branch $BRANCH_NAME_LINUX
+    - python3 -u ci-utilities/seed-package-registry.py --seed-file latest/developer-packages.yml --platform Linux 2>&1 | tee "seed-packages-linux-dev.log"
+  needs:
+    - job: all_publish_linux
+      artifacts: false
+
+all_publish_linux_openvino:
+  stage: Dependencies
+  extends:
+  - .appimage_base
+  - .seed_template_auto
+  script:
+    - python3 -u tools/replace-branch-in-seed-file.py latest/openvino-packages.yml --print --dst-branch $BRANCH_NAME_LINUX
+    - python3 -u ci-utilities/seed-package-registry.py --seed-file latest/openvino-packages.yml --platform Linux 2>&1 | tee "seed-packages-linux-openvino.log"
+  needs:
+    - job: all_publish_linux
+      artifacts: false
+
+# Local cache
+all_local_cache_linux:
+  extends:
+  - all_publish_linux
+  - .local_cache_mixin
+# Shared
+all_shared_linux:
+  extends:
+  - all_publish_linux
+  - .shared_build_mixin
+
+custom_publish_linux:
+  stage: Dependencies
+  extends:
+  - .seed_template
+  - .appimage_base
+  - .stage_deps_input_template
+  script:
+    - python3 -u ci-utilities/seed-multiple-projects.py -p "${{ job.inputs.KRITA_STAGE_DEP }}" --platform Linux --branch $BRANCH_NAME_LINUX 2>&1 | tee "seed-packages-linux.log"
+
+custom_local_cache_linux:
+  extends:
+  - custom_publish_linux
+  - .local_cache_mixin
+
+dirty_publish_linux:
+  extends:
+    - custom_publish_linux
+  script:
+    - python3 -u tools/seed-dirty-projects.py -p "${{ job.inputs.KRITA_STAGE_DEP }}" --platform Linux --branch $BRANCH_NAME_LINUX 2>&1 | tee "seed-packages-linux.log"
+
+dirty_local_cache_linux:
+  extends:
+  - dirty_publish_linux
+  - .local_cache_mixin

@@ -1,0 +1,14 @@
+Dependencies:
+- 'on': ['@all']
+  'require':
+    'base/python': '@same'
+    'base/qt': '@same'
+- 'on': ['Linux', 'MacOS']
+  'require':
+    'base/python-modules': '@same'
+BuildDependencies:
+- 'on': ['Windows']
+  'require':
+    'base/patch': '@same'
+
+

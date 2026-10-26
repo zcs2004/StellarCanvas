@@ -1,0 +1,12 @@
+Dependencies:
+- 'on': ['@all']
+  'require':
+    'base/lcms2': '@same'
+    'base/jpeg': '@same'
+- 'on': ['Windows', 'MacOS', 'Android']
+  'require':
+    'base/zlib': '@same'
+BuildDependencies:
+- 'on': ['Windows']
+  'require':
+    'base/patch': '@same'

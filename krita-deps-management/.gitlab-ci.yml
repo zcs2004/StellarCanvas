@@ -1,0 +1,244 @@
+## Overall seed job template for all jobs to make use of
+
+variables:
+  BRANCH_NAME_WINDOWS: 'master'
+  BRANCH_NAME_LINUX: 'master'
+  BRANCH_NAME_MACOS: 'master'
+  BRANCH_NAME_ANDROID: 'master'
+
+  VM_IMAGE_NAME_WINDOWS: 'storage.kde.org/vm-images/krita-windows-clang21-twinpy'
+  VM_IMAGE_NAME_LINUX: 'storage.kde.org/vm-images/krita-appimage-2204'
+  VM_IMAGE_NAME_ANDROID: 'storage.kde.org/vm-images/krita-android-sdk36-2204'
+
+  # The name of python executable that will be used for initializing
+  # the initial virtual envioronment. After venv is initialized, the chosen
+  # python can be addressed via plain 'python' or 'python3'
+  BOOTSTRAP_PYTHON_EXE_WINDOWS: 'C:\tools\Python-3.13\python.exe'
+
+stages:
+  - Dependencies
+  - SystemMaintenance
+
+.nightly-repo-cleanup:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $KRITACI_SCHEDULED_JOB_NAME == "repo-cleanup"
+      when: always
+
+.local_cache_mixin:
+  rules:
+    - when: manual
+  variables:
+    KDECI_CACHE_PATH: $CI_PROJECT_DIR/_local_cache
+    KDECI_ALLOW_PACKAGE_OVERRIDE_BY_CACHE: True
+    KDECI_PUBLISH_TO_CACHE: True
+
+.shared_build_mixin:
+  rules:
+    - when: manual
+  variables:
+    KDECI_REMOVE_INSTALL_FOLDERS_AFTER_BUILD: False
+    KDECI_SHARED_INSTALL_PATH: $CI_PROJECT_DIR/_shared_install
+
+.seed_template:
+  needs: []
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - when: manual
+  variables:
+    KDECI_GITLAB_SERVER: https://invent.kde.org/
+    # we need to make sure that the packages of the same batch don't try
+    # to link to each other's build prefix
+    KDECI_REMOVE_INSTALL_FOLDERS_AFTER_BUILD: True
+
+.seed_template_auto:
+  needs: []
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - when: always
+  variables:
+    KDECI_GITLAB_SERVER: https://invent.kde.org/
+    # we need to make sure that the packages of the same batch don't try
+    # to link to each other's build prefix
+    KDECI_REMOVE_INSTALL_FOLDERS_AFTER_BUILD: True
+
+.stage_deps_input_template:
+  inputs:
+    KRITA_STAGE_DEP:
+      default: base/unknown
+      description: A space-separated list of deps to build, e.g. `base/qt base/kconfig`
+
+.log_artifacts_windows:
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - ".\\**\\meson-logs\\meson-log.txt"
+      - ".\\**\\CMakeCache.txt"
+      - ".\\**\\CMakeFiles\\CMakeOutput.log"
+      - ".\\**\\config.log"
+      - ".\\**\\task.log"
+      - ".\\**\\task-debug.log"
+      - "./**/task.log"
+      - "./**/task-debug.log"
+      - "./**/CMakeCache.txt"
+      - "*.log"
+    exclude:
+      - "./**/meson-private/**/*"
+
+.log_artifacts_unix:
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - "./**/meson-logs/meson-log.txt"
+      - "./**/CMakeCache.txt"
+      - "./**/CMakeFiles/CMakeOutput.log"
+      - "./**/config.log"
+      - "*.log"
+    exclude:
+      - "./**/meson-private/**/*"
+
+.windows_base:
+  image: $VM_IMAGE_NAME_WINDOWS
+  tags:
+    - VM
+    - amd64
+  extends:
+    - .log_artifacts_windows
+  variables:
+    KDECI_CC_CACHE: "Z:\\krita-windows\\caches"
+    KDECI_CACHE_PATH: "Z:\\krita-windows\\artifacts"
+    KDECI_PACKAGE_PROJECT: teams/ci-artifacts/krita-windows
+    EXTERNALS_DOWNLOAD_DIR: "Z:\\krita-windows\\downloads"
+    KDECI_GLOBAL_CONFIG_OVERRIDE_PATH: "$CI_PROJECT_DIR\\global-config.yml"
+    KDECI_REPO_METADATA_PATH: "$CI_PROJECT_DIR\\repo-metadata"
+    KDECI_SIGN_BINARIES: True
+    KRITACI_WINDOWS_SIGN_CONFIG: "$CI_PROJECT_DIR\\upstream-ci-utilities\\signing\\signwindowsbinaries.ini"
+    KDECI_WORKDIR_PATH: "C:\\_"
+    KDECI_CA_BUNDLE: "C:\\_\\_ca_bundle\\cacert.pem"
+    PYTHONUTF8: 1
+  # different commits may build different deps, so they should not be cancellable
+  interruptible: false
+  before_script:
+      # Download update CA Bundle from Mozilla, our base Windows image
+      # is outdated and sysadmins have problems with keeping it up to date
+    - cmake -DKDECI_CA_BUNDLE_ARG="$KDECI_CA_BUNDLE" -P tools\download_ca_bundle.cmake
+    - $env:SSL_CERT_FILE = $KDECI_CA_BUNDLE
+
+    - >
+      & $BOOTSTRAP_PYTHON_EXE_WINDOWS -m venv venv --upgrade-deps
+    - . venv\Scripts\Activate.ps1
+
+    - git clone https://invent.kde.org/packaging/krita-ci-utilities.git --depth=1 ci-utilities
+    - git clone https://invent.kde.org/sysadmin/ci-notary-service.git --depth=1
+    - git clone https://invent.kde.org/sysadmin/ci-utilities.git upstream-ci-utilities --depth=1
+
+    - pip install -r requirements.txt
+    - pip install -r ci-utilities/requirements-windows.txt
+    - pip install -r ci-notary-service/requirements.txt
+
+    - git config --global --add safe.directory $CI_PROJECT_DIR
+
+.appimage_base:
+  image: $VM_IMAGE_NAME_LINUX
+  tags:
+    - VM
+    - amd64
+  extends:
+    - .log_artifacts_unix
+  variables:
+    KDECI_CC_CACHE: /mnt/krita-appimage/caches/
+    KDECI_CACHE_PATH: /mnt/krita-appimage/artifacts/
+    KDECI_PACKAGE_PROJECT: teams/ci-artifacts/krita-appimage
+    EXTERNALS_DOWNLOAD_DIR: /mnt/krita-appimage/downloads
+    KDECI_GLOBAL_CONFIG_OVERRIDE_PATH: "$CI_PROJECT_DIR/global-config.yml"
+    KDECI_REPO_METADATA_PATH: "$CI_PROJECT_DIR/repo-metadata"
+    KDECI_BUILD_TYPE: Release
+  # different commits may build different deps, so they should not be cancellable
+  interruptible: false
+  before_script:
+    - python3 -m venv venv --upgrade-deps
+    - . venv/bin/activate
+    - pip install -r requirements.txt
+    # Reactivate the venv to force it to use pip version of meson
+    - . venv/bin/activate
+    - git clone https://invent.kde.org/packaging/krita-ci-utilities.git --depth=1 ci-utilities
+    - git config --global --add safe.directory $CI_PROJECT_DIR
+
+.android_base:
+  image: $VM_IMAGE_NAME_ANDROID
+  tags:
+    - VM
+    - amd64
+  extends:
+    - .log_artifacts_unix
+  variables:
+    EXTERNALS_DOWNLOAD_DIR: /mnt/krita-appimage/artifacts/downloads # reuse appimage caches!
+    KDECI_GLOBAL_CONFIG_OVERRIDE_PATH: "$CI_PROJECT_DIR/global-config.yml"
+    KDECI_REPO_METADATA_PATH: "$CI_PROJECT_DIR/repo-metadata"
+    KDECI_BUILD_TYPE: Release
+    KDECI_SKIP_ECM_ANDROID_TOOLCHAIN: 'True'
+    CMAKE_TOOLCHAIN_FILE: $CI_PROJECT_DIR/tools/android-toolchain.cmake
+    # ANDROID_HOME: /opt/android-tooling # <-- set up in the base image!
+    # KDECI_ANDROID_SDK_ROOT: $ANDROID_HOME/sdk # <-- set up in the base image!
+    # KDECI_ANDROID_NDK_ROOT: $ANDROID_HOME/android-ndk-r22b/ # <-- set up in the base image!
+
+  # different commits may build different deps, so they should not be cancellable
+  interruptible: false
+  before_script:
+    - . /var/lib/ci-files/setup-environment.sh
+
+    - python3 -m venv venv --upgrade-deps
+    # Venvs can not be stacked
+    - . venv/bin/activate
+    - pip install -r requirements.txt
+    # Ensure that we're using the venv version of dependencies
+    - . venv/bin/activate
+    - git clone https://invent.kde.org/packaging/krita-ci-utilities.git --depth=1 ci-utilities
+    - git config --global --add safe.directory $CI_PROJECT_DIR
+
+.macos_base:
+  tags:
+    - macOS
+  extends:
+    - .log_artifacts_unix
+  variables:
+    # ccache is not present on macOS
+    # KDECI_CC_CACHE: /Users/gitlab/caches/krita-macos/cache
+    KDECI_CACHE_PATH: /Users/gitlab/caches/krita-macos/artifacts
+    KDECI_PACKAGE_PROJECT: teams/ci-artifacts/krita-macos
+    EXTERNALS_DOWNLOAD_DIR: /Users/gitlab/caches/krita-macos/downloads
+    KDECI_GLOBAL_CONFIG_OVERRIDE_PATH: "$CI_PROJECT_DIR/global-config.yml"
+    KDECI_REPO_METADATA_PATH: "$CI_PROJECT_DIR/repo-metadata"
+    KDECI_BUILD_TYPE: Release
+    MACOSX_DEPLOYMENT_TARGET: "10.15"
+    QMAKE_MACOSX_DEPLOYMENT_TARGET: "10.15"
+    CMAKE_TOOLCHAIN_FILE: $CI_PROJECT_DIR/tools/macos-toolchain.cmake
+
+  # different commits may build different deps, so they should not be cancellable
+  interruptible: false
+  before_script:
+    - python3 -m venv venv --upgrade-deps
+    - . venv/bin/activate
+    - pip install -r requirements.txt
+    - git clone https://invent.kde.org/packaging/krita-ci-utilities.git --depth=1 ci-utilities
+    - git clone https://invent.kde.org/sysadmin/ci-utilities.git --depth=1 upstream-ci-utilities
+
+    - python3 -u tools/download-macos-tools.py
+    - source _krita-tools/activate
+
+    - git config --global --add safe.directory $CI_PROJECT_DIR
+
+include:
+  - /pipelines/linux.yml
+  - /pipelines/windows.yml
+  - /pipelines/macos.yml
+  - /pipelines/android.yml
+  - /pipelines/registry-cleanup.yml
+  - /pipelines/generate-deps-visualization.yml

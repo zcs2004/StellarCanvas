@@ -1,0 +1,50 @@
+cmake_minimum_required(VERSION 3.29)
+
+project(ext_nasm)
+include(${CMAKE_SOURCE_DIR}/../cmake/base-dep-options.cmake)
+
+if (WIN32)
+    ExternalProject_Add(
+        ext_nasm
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+
+        # the official website seems to be down regularly, please copy the
+        # archive to the KDE's infrastructure during updates
+        # URL https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip
+
+        URL https://files.kde.org/krita/build/dependencies/nasm-2.16.03-win64.zip
+        URL_HASH SHA256=3ee4782247bcb874378d02f7eab4e294a84d3d15f3f6ee2de2f47a46aa7226e6
+
+        BUILD_COMMAND ""
+        CONFIGURE_COMMAND ""
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E echo Deploying nasm 64-bit binaries
+                COMMAND ${CMAKE_COMMAND} -DSRC=<SOURCE_DIR>/nasm.exe -DDST=${EXTPREFIX}/bin/ -P ${KRITA_CI_INSTALL}
+                COMMAND ${CMAKE_COMMAND} -DSRC=<SOURCE_DIR>/ndisasm.exe -DDST=${EXTPREFIX}/bin/ -P ${KRITA_CI_INSTALL}
+
+        UPDATE_COMMAND ""
+    )
+else ()
+    ExternalProject_Add(
+        ext_nasm
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+
+        # the official website seems to be down regularly, please copy the
+        # archive to the KDE's infrastructure during updates
+        #URL https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.gz
+
+        URL https://files.kde.org/krita/build/dependencies/nasm-2.16.03.tar.gz
+        URL_HASH SHA256=5bc940dd8a4245686976a8f7e96ba9340a0915f2d5b88356874890e207bdb581
+
+        PATCH_COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0001-Disable-installing-man-pages-which-are-not-built.patch
+
+        CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${EXTPREFIX} ${GLOBAL_AUTOMAKE_PROFILE}
+
+        UPDATE_COMMAND ""
+        
+        # automake has an issue when tryin gto build outside of the course tree
+        # 'sh: 0: Can't open autogen.sh'
+        BUILD_IN_SOURCE ON
+    )
+endif()
+
+krita_add_to_ci_targets(ext_nasm)

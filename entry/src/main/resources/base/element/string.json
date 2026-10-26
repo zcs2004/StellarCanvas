@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "StellarCanvas digital art studio"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "StellarCanvas digital art studio"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "StellarCanvas"
+    }
+  ]
+}

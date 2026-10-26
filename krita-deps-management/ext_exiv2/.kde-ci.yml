@@ -1,0 +1,11 @@
+Dependencies:
+- 'on': ['@all']
+  'require':
+    'base/expat': '@same'
+    'base/brotli': '@same'
+- 'on': ['Windows']
+  'require':
+    'base/iconv': '@same'
+- 'on': ['Windows', 'MacOS', 'Android']
+  'require':
+    'base/zlib': '@same'

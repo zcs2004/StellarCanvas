@@ -1,0 +1,8 @@
+Environment:
+  # We don't ship Perl to the users, it is used for building
+  # some of the dependencies, so no need to sign it with our
+  # certificate
+  KDECI_SIGN_BINARIES: "False"
+  # signing and stripping scripts fail on strawberryperl,
+  # so we should just exclude them
+  KDECI_POST_INSTALL_SCRIPTS_FILTER: "fix-pcfiles"

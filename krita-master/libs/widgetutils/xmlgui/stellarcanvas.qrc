@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/stellarcanvas">
+    <file alias="wechat-pay.png">stellarcanvas/wechat-pay.png</file>
+    <file alias="alipay.png">stellarcanvas/alipay.jpg</file>
+</qresource>
+</RCC>

@@ -1,0 +1,9 @@
+Dependencies:
+- 'on': ['@all']
+  'require':
+    'base/zug': '@same'
+    'base/immer': '@same'
+BuildDependencies:
+- 'on': ['Windows']
+  'require':
+    'base/patch': '@same'

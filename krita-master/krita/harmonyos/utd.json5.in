@@ -1,0 +1,36 @@
+{
+  "UniformDataTypeDeclarations": [
+    {
+      "TypeId": "@KRITA_HARMONYOS_BUNDLE_NAME@.krita-document",
+      "BelongingToTypes": ["general.composite-object"],
+      "FilenameExtensions": [".kra"],
+      "MIMETypes": ["application/x-krita"],
+      "Description": "Krita layered image document",
+      "ReferenceURL": "https://docs.krita.org/en/general_concepts/file_formats/file_kra.html"
+    },
+    {
+      "TypeId": "@KRITA_HARMONYOS_BUNDLE_NAME@.krita-archive",
+      "BelongingToTypes": ["general.composite-object"],
+      "FilenameExtensions": [".krz"],
+      "MIMETypes": ["application/x-krita-archive"],
+      "Description": "Krita archived layered image document",
+      "ReferenceURL": "https://krita.org"
+    },
+    {
+      "TypeId": "@KRITA_HARMONYOS_BUNDLE_NAME@.openraster-image",
+      "BelongingToTypes": ["general.image"],
+      "FilenameExtensions": [".ora"],
+      "MIMETypes": ["image/openraster"],
+      "Description": "OpenRaster layered image document",
+      "ReferenceURL": "https://www.openraster.org"
+    },
+    {
+      "TypeId": "@KRITA_HARMONYOS_BUNDLE_NAME@.photoshop-document",
+      "BelongingToTypes": ["general.image"],
+      "FilenameExtensions": [".psd", ".psb"],
+      "MIMETypes": ["image/vnd.adobe.photoshop"],
+      "Description": "Adobe Photoshop image document",
+      "ReferenceURL": "https://www.adobe.com/products/photoshop.html"
+    }
+  ]
+}

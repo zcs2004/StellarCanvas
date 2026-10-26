@@ -1,0 +1,13 @@
+<!DOCTYPE RCC>
+<!--
+  SPDX-FileCopyrightText: none
+  SPDX-License-Identifier: CC0-1.0
+-->
+<RCC version="1.0">
+    <qresource>
+        <file alias="krita-branding.svgz">sc-apps-krita.svgz</file>
+        <file alias="stellarcanvas-app-icon.png">../../../../../AppScope/resources/base/media/app_icon.png</file>
+        <file alias="stellarcanvas-gpl-3.0.txt">../../../../COPYING</file>
+        <file alias="stellarcanvas-license.txt">../../../../COPYING-CMAKE-SCRIPTS</file>
+    </qresource>
+</RCC>

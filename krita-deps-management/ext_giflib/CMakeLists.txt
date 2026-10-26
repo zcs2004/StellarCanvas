@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.29)
+
+project(ext_giflib)
+include(${CMAKE_SOURCE_DIR}/../cmake/base-dep-options.cmake)
+
+ExternalProject_Add(
+    ext_giflib
+    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+    URL https://sourceforge.net/projects/giflib/files/giflib-5.x/giflib-5.2.1.tar.gz/download
+    URL_MD5 6f03aee4ebe54ac2cc1ab3e4b0a049e5
+
+    PATCH_COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0001-Add-vcpkg-CMake-toolchain.patch
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTPREFIX} -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE} -DBUILD_utils=OFF
+
+    UPDATE_COMMAND ""
+)
+
+krita_add_to_ci_targets(ext_giflib)

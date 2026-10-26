@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.29)
+
+project(ext_libunwindstack-ndk)
+include(${CMAKE_SOURCE_DIR}/../cmake/base-dep-options.cmake)
+
+ExternalProject_Add( ext_libunwindstack-ndk
+    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+    SOURCE_SUBDIR ./cmake
+    GIT_REPOSITORY https://github.com/getsentry/libunwindstack-ndk.git
+    GIT_TAG 284202fb1e42dbeba6598e26ced2e1ec404eecd1
+    PATCH_COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0001-Add-install-property-and-cmake-config-file.patch
+
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTPREFIX}
+               -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE}
+                ${GLOBAL_PROFILE}
+    UPDATE_COMMAND ""
+)
+
+krita_add_to_ci_targets(ext_libunwindstack-ndk)

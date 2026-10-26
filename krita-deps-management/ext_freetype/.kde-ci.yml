@@ -1,0 +1,15 @@
+Dependencies:
+- 'on': ['@all']
+  'require':
+    'base/png': '@same'
+    'base/icu': '@same'
+- 'on': ['Windows', 'MacOS']
+  'require':
+    'base/pkgconfig': '@same'
+- 'on': ['MacOS']
+  'require':
+    'base/zlib':  '@same'
+BuildDependencies:
+- 'on': ['Windows']
+  'require':
+    'base/patch': '@same'

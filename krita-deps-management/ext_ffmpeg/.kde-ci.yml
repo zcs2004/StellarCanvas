@@ -1,0 +1,43 @@
+Dependencies:
+- 'on': ['Windows']
+  'require':
+    'base/iconv': '@same' # on Linux and MacOS ffmpeg uses iconv provided by libc
+
+- 'on': ['@all']
+  'require':
+    'ffmpeg/flac': '@same'
+    'ffmpeg/opus': '@same'
+    'ffmpeg/sdl2': '@same'
+    'ffmpeg/vpx': '@same'
+    'ffmpeg/libvorbis': '@same'
+    'ffmpeg/libtheora': '@same'
+    'ffmpeg/openh264': '@same'
+    'ffmpeg/lame': '@same'
+    'heif/libaom': '@same'
+    'base/webp': '@same'
+    'base/png': '@same'
+    'base/jpeg': '@same'
+
+- 'on': ['Windows', 'MacOS']
+  'require':
+    'base/pkgconfig': '@same'
+
+- 'on': ['Windows', 'MacOS', 'Linux']
+  'require':
+    'base/lzma': '@same'
+
+- 'on': ['Windows', 'Linux']
+  'require':
+    'ffmpeg/vpl': '@same'
+
+- 'on': ['Windows', 'MacOS', 'Android']
+  'require':
+    'base/zlib': '@same'
+
+BuildDependencies:
+- 'on': ['Windows']
+  'require':
+    'base/patch': '@same'
+- 'on': ['Windows', 'Linux', 'MacOS', 'Android/x86_64', 'Android/x86']
+  'require':
+    'base/nasm': '@same'

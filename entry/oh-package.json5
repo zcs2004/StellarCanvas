@@ -1,0 +1,12 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "HarmonyOS host module for StellarCanvas.",
+  "main": "",
+  "author": "StellarCanvas contributors",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "libstellarcanvas.so": "file:./src/main/cpp/types/libstellarcanvas"
+  }
+}
+

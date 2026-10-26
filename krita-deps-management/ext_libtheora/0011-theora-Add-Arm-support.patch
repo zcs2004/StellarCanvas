@@ -1,0 +1,156 @@
+diff --git a/lib/meson.build b/lib/meson.build
+index e22aa0f..c28d9b3 100644
+--- a/lib/meson.build
++++ b/lib/meson.build
+@@ -38,6 +38,8 @@ decoder_sources = files(
+   'state.c',
+ )
+ 
++common_arm_sources = files()
++
+ if conf.get('CPU_x86_64', false)
+   if cc.get_argument_syntax() != 'msvc'
+     encoder_sources += files(
+@@ -105,6 +107,47 @@ elif conf.get('CPU_x86_32', false)
+       'x86_vc/x86state.c',
+     )
+   endif
++elif cc.get_id() == 'gcc' and conf.get('CPU_arm', false)
++  # The Arm bits require the Arm -> GNU conversion script
++
++  arm2gnu_pl = find_program('arm/arm2gnu.pl', required: true)
++  arm2gnu_py = find_program('arm/arm2gnu-wrapper.py', required: true)
++
++  arm2gnu_gen = generator(
++   arm2gnu_py,
++   arguments: ['--program', arm2gnu_pl.full_path(), '@INPUT@'],
++   capture: true,
++   output: '@BASENAME@-gnu.S',
++  )
++
++  arm_opts_s = configure_file(
++   input: 'arm/armopts.s.in',
++   configuration: conf,
++   output: 'armopts.S',
++  )
++
++  common_arm_sources += arm2gnu_gen.process(
++   files('arm/armbits.s', 'arm/armfrag.s', 'arm/armidct.s', 'arm/armloop.s'),
++   arm_opts_s,
++  )
++
++  encoder_sources += arm2gnu_gen.process(
++   files(
++     'arm/armencfrag.s',
++     'arm/armenquant.s',
++   ),
++  )
++
++  encoder_sources += files(
++   'arm/armcpu.c',
++   'arm/armenc.c',
++   'arm/armstate.c',
++  )
++
++  decoder_sources += files(
++   'arm/armcpu.c',
++   'arm/armstate.c',
++  )
+ endif
+ 
+ decoder_res = files()
+diff --git a/meson.build b/meson.build
+index c122073..49d1edc 100644
+--- a/meson.build
++++ b/meson.build
+@@ -135,6 +135,7 @@ if mem_constraint.enabled()
+ endif
+ 
+ asm = not get_option('asm').disabled()
++enable_asflag_probe = not get_option('asflag-probe').disabled()
+ if asm
+   if host_machine.cpu_family() == 'x86_64'
+     conf.set('CPU_x86_64', true)
+@@ -145,6 +146,64 @@ if asm
+   elif host_machine.cpu_family() == 'x86'
+     conf.set('CPU_x86_32', true)
+     conf.set('OC_X86_ASM', true)
++  elif host_machine.cpu_family() == 'arm' or host_machine.cpu_family() == 'aarch64'
++      conf.set('CPU_arm', true)
++      if cc.get_id() == 'gcc'
++        conf.set('OC_ARM_ASM', true)
++      endif
++    endif
++  
++    if cc.get_id() == 'gcc' and conf.get('CPU_arm', false)
++      # The following checks were only designed for GNU AS.
++      # Perl is needed for the arm2gnu reformatter.
++      perl_exe = find_program('perl', required: false, disabler: true)
++  
++      if not perl_exe.found()
++        warning('*** ARM assembly requires perl -- disabling optimizations')
++      endif
++  
++      if enable_asflag_probe and perl_exe.found()
++        assembler_checks = [
++          [
++            ['HAVE_ARM_ASM_NEON', 'OC_ARM_ASM_NEON'],
++            '''.file "configure"
++                vorr d0,d0,d0
++            ''',
++            ['-mfpu=neon', '-march=armv7-a'],
++            'assembler supports NEON instructions on ARM'
++          ],
++          [
++            ['HAVE_ARM_ASM_MEDIA', 'OC_ARM_ASM_MEDIA'],
++            '''.file "configure"
++                shadd8 r3,r3,r3
++            ''', 
++            ['-march=armv6j'],
++            'assembler supports ARMv6 media instructions on ARM'],
++          [
++            ['HAVE_ARM_ASM_EDSP', 'OC_ARM_ASM_EDSP'],
++            '''.file "configure"
++                qadd r3,r3,r3
++            ''',
++            ['-march=armv5e'],
++            'assembler supports EDSP instructions on ARM'
++          ]
++        ]
++  
++        foreach check : assembler_checks
++          pass = cc.compiles(check[1],
++            args: ['-x', 'assembler'],
++            name: check[3]
++          ) or cc.compiles(check[1],
++              args: ['-x', 'assembler'] + check[2],
++              name: check[3]
++            )
++  
++          foreach define : check[0]
++            conf.set(define, pass)
++            conf.set(define, pass)
++          endforeach
++        endforeach
++      endif
+   endif
+ endif
+ 
+diff --git a/meson_options.txt b/meson_options.txt
+index c378660..af88803 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -22,6 +22,12 @@ option(
+     value: 'enabled',
+     description: 'Enable assembly optimizations',
+ )
++option(
++    'asflag-probe',
++    type: 'feature',
++    value: 'enabled',
++    description: 'Enable instructions not supported by the default assembler flags (Arm only).',
++)
+ option(
+     'telemetry',
+     type: 'feature',
+

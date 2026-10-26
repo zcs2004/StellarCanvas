@@ -1,0 +1,48 @@
+From fc490ee85c29bd5f553f1e4965e97569912aa6c6 Mon Sep 17 00:00:00 2001
+From: Dmitry Kazakov <dimula73@gmail.com>
+Date: Mon, 14 Apr 2025 12:59:22 +0200
+Subject: [PATCH 02/10] Add options for SSP and CFGuard
+
+---
+ meson.build       | 13 +++++++++++++
+ meson_options.txt |  2 ++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/meson.build b/meson.build
+index f9fd42f9f8..9507aa6b2e 100644
+--- a/meson.build
++++ b/meson.build
+@@ -581,6 +581,19 @@ types_list = [
+   'struct_mfxConfigInterface',
+ ]
+ 
++option_cfguard = get_option('enable-cfguard').require(cc.has_argument('-mguard=cf'), error_message : 'Compiler does not support cfguard')
++if option_cfguard.allowed()
++  add_global_arguments('-mguard=cf', language : ['c', 'cpp'])
++  add_global_link_arguments('-mguard=cf', language : ['c', 'cpp'])
++  message('Enabled CFGuard')
++endif
++
++if get_option('enable-ssp').require(cc.has_argument('-fstack-protector-strong'), error_message : 'Compiler does not support -fstack-protector-strong').allowed()
++  add_global_arguments('-fstack-protector-strong', language : ['c', 'cpp'])
++  add_global_link_arguments('-fstack-protector-strong', language : ['c', 'cpp'])
++  message('Enabled SSP')
++endif
++
+ if get_option('no_uninit_ub')
+   add_global_arguments('-DDISABLE_AV_UNINIT_UB=1', language : 'c')
+   add_global_arguments('-DDISABLE_AV_UNINIT_UB=1', language : 'cpp')
+diff --git a/meson_options.txt b/meson_options.txt
+index 4fa1471213..0a8892fb4b 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -2538,3 +2538,5 @@ option('large_tests', type : 'feature', value : 'disabled')
+ option('assert_level', type: 'integer', min: 0, max: 2, value: 0)
+ option('suppress_warnings', type: 'boolean', value: false, description: 'Disable all compiler warnings. Only used when built as a subproject.')
+ option('no_uninit_ub', type: 'boolean', value: false, description: 'Disable UB in av_uninit optimization')
++option('enable-ssp', type: 'feature', value: 'enabled', description: 'Enable -fstack-protector-strong')
++option('enable-cfguard', type: 'feature', value: 'auto', description: 'Enable control flow guard')
+\ No newline at end of file
+-- 
+2.54.0
+

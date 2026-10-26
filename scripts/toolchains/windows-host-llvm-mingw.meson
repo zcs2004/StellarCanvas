@@ -1,0 +1,14 @@
+# Meson native file for host tools built with LLVM-MinGW on Windows.
+# Replace C:/path/to/StellarCanvas with the absolute checkout path before use.
+
+[binaries]
+c = 'C:/path/to/StellarCanvas/.tools/qt/Tools/llvm-mingw1706_64/bin/clang.exe'
+cpp = 'C:/path/to/StellarCanvas/.tools/qt/Tools/llvm-mingw1706_64/bin/clang++.exe'
+ar = 'C:/path/to/StellarCanvas/.tools/qt/Tools/llvm-mingw1706_64/bin/llvm-ar.exe'
+strip = 'C:/path/to/StellarCanvas/.tools/qt/Tools/llvm-mingw1706_64/bin/llvm-strip.exe'
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
