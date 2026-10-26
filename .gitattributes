@@ -1,0 +1,32 @@
+* text=auto
+
+*.c text eol=lf
+*.cc text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.hpp text eol=lf
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+*.ets text eol=lf
+*.ts text eol=lf
+*.json text eol=lf
+*.json5 text eol=lf
+*.md text eol=lf
+*.meson text eol=lf
+*.py text eol=lf
+*.ps1 text eol=crlf
+*.sh text eol=lf
+
+*.7z binary
+*.gif binary
+*.gz binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.kra binary
+*.ora binary
+*.png binary
+*.svg text eol=lf
+*.tar binary
+*.webp binary
+*.zip binary

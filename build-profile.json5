@@ -1,0 +1,46 @@
+{
+  "app": {
+    // Signing configuration is intentionally not committed. Configure a local
+    // debug or release identity in DevEco Studio, or inject it through CI.
+    "products": [
+      {
+        "name": "default",
+        "targetSdkVersion": "6.1.1(24)",
+        "compatibleSdkVersion": "6.1.1(24)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          },
+          "nativeCompiler": "BiSheng"
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug"
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      // harmonydeployqt generates this module during the native build. The
+      // checked-in ./entry module is an ArkTS UI prototype and does not load
+      // the Qt/Krita runtime.
+      "srcPath": "./build/krita-ohos-arm64/krita/harmonyos-build/entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}

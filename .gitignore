@@ -1,0 +1,63 @@
+# Dependency installations
+/node_modules/
+/oh_modules/
+**/node_modules/
+**/oh_modules/
+
+# HarmonyOS / Hvigor generated state
+/.hvigor/
+/.hvigor-*/
+**/.hvigor/
+/.appanalyzer/
+**/.test/
+
+# Build output
+/build/
+**/build/
+/.cxx/
+**/.cxx/
+/CMakeFiles/
+/cmake-build-*/
+
+# Downloaded dependencies and local tools
+/third_party/
+/.tools/
+/.cache/
+/.npm-cache/
+/.ohpm-cache/
+/.qt/
+/artifacts/
+
+# IDE and machine-local configuration
+/.idea/
+/.vscode/
+*.iml
+local.properties
+.clangd
+
+# Signing material and secrets
+*.cer
+*.crt
+*.key
+*.keystore
+*.jks
+*.p12
+*.p7b
+*.pem
+*.pfx
+.env
+.env.*
+!.env.example
+
+# Logs, crash dumps, packages, and temporary files
+*.dmp
+*.log
+*.tmp
+*.hap
+*.har
+aqtinstall.log
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
