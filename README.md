@@ -1,6 +1,14 @@
-# StellarCanvas
+<div align="center">
+  <img
+    src="AppScope/resources/base/media/app_icon.png"
+    alt="StellarCanvas application icon"
+    width="180"
+  />
+  <h1>StellarCanvas</h1>
+  <p><strong>Krita for HarmonyOS tablets and 2-in-1 devices</strong></p>
+</div>
 
-![StellarCanvas application icon](AppScope/resources/base/media/app_icon.png)
+---
 
 StellarCanvas is a work-in-progress port and adaptation of Krita for HarmonyOS
 tablets and 2-in-1 devices. The repository contains the HarmonyOS application
